@@ -7,21 +7,20 @@ module.exports = class Application {
         this.server = this.#createServer()
         this.middlewares = []
     }
-
-    listen(PORT, callback) {
-        this.server.listen(PORT, callback)
+    listen(port, callback) {
+        this.server.listen(port, callback)
     }
 
-    use(middleware){
+    use(middleware) {
         this.middlewares.push(middleware)
     }
 
-    addRouter(router){
-        Object.keys(router).forEach(path=>{
-            const endpoint = router[path]
-            Object.keys(endpoint).forEach(method=>{
+    addRouter(endpoints) {
+        Object.keys(endpoints).forEach(path=> {
+            const endpoint = endpoints[path]
+            Object.keys(endpoint).forEach(method=> {
                 const handler = endpoint[method]
-                this.emitter.on(this.#getEventName(path,method), (req, res)=>{
+                this.emitter.on(this.#getRouterName(path, method), (req, res)=>{
                     handler(req, res)
                 })
             })
@@ -32,24 +31,20 @@ module.exports = class Application {
         return http.createServer((req, res)=>{
             let body = ''
             req.on('data', (chunk)=>{
-                body+=chunk
+                body += chunk
             })
             req.on('end', ()=>{
                 if (body) {
                     req.body = JSON.parse(body)
                 }
-                this.middlewares.forEach(middleware => middleware(req, res))
-                const emit = this.emitter.emit(this.#getEventName(req.pathname, req.method), req, res)
-                if(!emit) {
-                    res.end()
-                }
+                this.middlewares.forEach(middleware=>middleware(req, res))
+                const endpoint = this.emitter.emit(this.#getRouterName(req.pathname, req.method), req, res)
+                if(!endpoint) res.end('NOT FOUND')
             })
-
         })
     }
 
-    #getEventName(path, method) {
+    #getRouterName(path, method){
         return `[${path}]:[${method}]`
     }
-
 }

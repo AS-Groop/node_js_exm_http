@@ -3,28 +3,27 @@ module.exports = class Router {
         this.endpoints = {}
     }
 
-    request(path, method, handler) {
+    request(path, method='GET', handler) {
         if (!this.endpoints[path]) {
-            this.endpoints[path]={}
+            this.endpoints[path] = {}
         }
         const endpoint = this.endpoints[path]
         if (endpoint[method]) {
-            throw new Error(`Этот метод(${path}) уже существо`)
+            throw new Error(`${method} по адресу ${path} уже существует`)
         }
-        endpoint[method]=handler
-
+        endpoint[method] = handler
     }
 
-    get(path, handler){
-        this.request(path, 'GET',handler)
+    get(path, handler) {
+        this.request(path, 'GET', handler)
     }
-    post(path, handler){
-        this.request(path, 'POST',handler)
+    post(path, handler) {
+        this.request(path, 'POST', handler)
     }
-    put(path, handler){
-        this.request(path, 'PUT',handler)
+    put(path, handler) {
+        this.request(path, 'PUT', handler)
     }
-    delete(path, handler){
-        this.request(path, 'DELETE',handler)
+    delete(path, handler) {
+        this.request(path, 'DELETE', handler)
     }
 }
